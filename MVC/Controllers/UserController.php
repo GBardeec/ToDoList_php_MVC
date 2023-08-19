@@ -1,13 +1,10 @@
 <?php
 
-require_once 'MVC/models/UserModel.php';
-
 class UserController
 {
     public function login()
     {
-
-        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['login']) && isset($_POST['password'])) {
             $login = htmlspecialchars($_POST['login']);
             $password = htmlspecialchars($_POST['password']);
 
@@ -18,12 +15,15 @@ class UserController
                 header('Location: /');
                 return;
             } else {
-                $registered = $userModel->registerAndLogin($login, $password);
-                if ($registered) {
-                    header('Location: /');
-                    return;
+                $userExists = $userModel->checkUserExists($login);
+                if ($userExists) {
+                    header('Location: /login');
                 } else {
-                    echo "<script>alert('Пароль не правильный');</script>";
+                    $registered = $userModel->registerAndLogin($login, $password);
+                    if ($registered) {
+                        header('Location: /');
+                        return;
+                    }
                 }
             }
         }

@@ -1,5 +1,4 @@
 <?php
-require_once 'MVC/models/TaskModel.php';
 
 class TaskController
 {
@@ -10,12 +9,15 @@ class TaskController
         $this->model = new TaskModel();
     }
 
-    public function addTask($description)
+    public function addTask()
     {
-        $user_id = (integer) $_SESSION['id'];
-        $created_at = date('Y-m-d H:i:s');
-        $this->model->addTask($user_id, $description, $created_at);
-        header('Location: /');
+        if (isset($_POST['description'])) {
+            $description = $_POST['description'];
+            $user_id = (integer) $_SESSION['id'];
+            $created_at = date('Y-m-d H:i:s');
+            $this->model->addTask($user_id, $description, $created_at);
+            header('Location: /');
+        }
     }
 
     public function getTasksWithStatusNull()
@@ -46,16 +48,22 @@ class TaskController
         header('Location: /');
     }
 
-    public function deleteOneTask($taskId)
+    public function deleteOneTask()
     {
-        $this->model->deleteOneTask($taskId);
-        header('Location: /');
+        if (isset($_POST['taskId'])) {
+            $taskId = $_POST['taskId'];
+            $this->model->deleteOneTask($taskId);
+            header('Location: /');
+        }
     }
 
-    public function toggleStatus($taskId)
+    public function toggleStatus()
     {
-        $this->model->toggleStatus($taskId);
-        header('Location: /');
+        if (isset($_POST['taskId'])) {
+            $taskId = $_POST['taskId'];
+            $this->model->toggleStatus($taskId);
+            header('Location: /');
+        }
     }
 
     public function changeBackGroundColor($row)

@@ -1,6 +1,6 @@
 <?php
 
-require_once 'database.php';
+require_once 'Database.php';
 
 class TaskModel
 {
@@ -8,8 +8,8 @@ class TaskModel
 
     public function __construct()
     {
-        global $connection;
-        $this->connection = $connection;
+        $database = Database::getInstance();
+        $this->connection = $database->getConnection();
     }
 
     public function addTask($user_id, $description, $created_at)

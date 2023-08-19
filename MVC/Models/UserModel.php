@@ -1,6 +1,6 @@
 <?php
 
-require_once 'database.php';
+require_once 'Database.php';
 
 class UserModel
 {
@@ -8,8 +8,18 @@ class UserModel
 
     public function __construct()
     {
-        global $connection;
-        $this->connection = $connection;
+        $database = Database::getInstance();
+        $this->connection = $database->getConnection();
+    }
+
+    public function checkUserExists($username)
+    {
+        $stmt = $this->connection->prepare("SELECT id FROM users WHERE login = :username");
+        $stmt->bindParam(':username', $username);
+        $stmt->execute();
+        $user = $stmt->fetch();
+
+        return ($user !== false);
     }
 
     public function login($username, $password)
@@ -20,7 +30,6 @@ class UserModel
         $user = $stmt->fetch();
 
         if ($user && password_verify($password, $user['password'])) {
-            session_start();
             $_SESSION['id'] = $user['id'];
             $_SESSION['login'] = $user['login'];
             return true;
@@ -38,19 +47,11 @@ class UserModel
         $stmt = $this->connection->prepare($sql);
         $stmt->execute([$username, $hashedPassword, $created_at]);
 
-        $id = $this->connection->lastInsertId();
-
         $loggedIn = $this->login($username, $password);
 
         if ($loggedIn) {
-            session_start();
-            $_SESSION['login'] = $username;
             return true;
         } else {
-            $sqlDelete = "DELETE FROM users WHERE id = ?";
-            $stmtDelete = $this->connection->prepare($sqlDelete);
-            $stmtDelete->execute([$id]);
-
             return false;
         }
     }

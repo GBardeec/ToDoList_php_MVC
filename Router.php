@@ -3,16 +3,16 @@
 class Router
 {
     private $routes = array(
-        '' => 'IndexController@index',
+     '' => array('controller' => 'IndexController', 'method' => 'index'),
 
-        'login' => 'UserController@login',
-        'logout' => 'UserController@logout',
+     'login' => array('controller' => 'UserController', 'method' => 'login'),
+     'logout' => array('controller' => 'UserController', 'method' => 'logout'),
 
-        'addTask' => 'TaskController@addTask',
-        'deleteAllTask' => 'TaskController@deleteAllTask',
-        'changeStatusAllTask' => 'TaskController@changeStatusAllTask',
-        'deleteOneTask' => 'TaskController@deleteOneTask',
-        'toggleStatus' => 'TaskController@toggleStatus',
+     'addTask' => array('controller' => 'TaskController', 'method' => 'addTask'),
+     'deleteAllTask' => array('controller' => 'TaskController', 'method' => 'deleteAllTask'),
+     'changeStatusAllTask' => array('controller' => 'TaskController', 'method' => 'changeStatusAllTask'),
+     'deleteOneTask' => array('controller' => 'TaskController', 'method' => 'deleteOneTask'),
+     'toggleStatus' => array('controller' => 'TaskController', 'method' => 'toggleStatus'),
     );
 
     public function route()
@@ -21,32 +21,28 @@ class Router
         $url = trim($url, '/');
         $url = explode('?', $url)[0];
 
-        foreach ($this->routes as $route => $action) {
-            if ($url === $route) {
-                $routeAction = explode('@', $action);
-                $controllerName = ucfirst($routeAction[0]);
-                $methodName = $routeAction[1];
+        if (array_key_exists($url, $this->routes)) {
+            $routeInfo = $this->routes[$url];
+            $controllerName = ucfirst($routeInfo['controller']);
+            $methodName = $routeInfo['method'];
 
-                require_once 'MVC/Controllers/' . $controllerName . '.php';
+            // Замените подключение контроллера на автозагрузку
+            $controller = new $controllerName();
 
-                $controller = new $controllerName();
-                $methodParameters = [];
+            $urlParts = explode('/', $url);
+            $methodParameters = array_slice($urlParts, 2);
 
-                if ($methodName === 'addTask') {
-                    $description = $_POST['description'];
-                    $methodParameters[] = $description;
-                } else if ($methodName === 'deleteOneTask') {
-                    $taskId = $_POST['taskId'];
-                    $methodParameters[] = $taskId;
-                } else if ($methodName === 'toggleStatus') {
-                    $taskId = $_POST['taskId'];
-                    $methodParameters[] = $taskId;
-                }
-
-                call_user_func_array([$controller, $methodName], $methodParameters);
-                return;
-            }
+            $controller->$methodName(...$methodParameters);
+        } else {
+            echo 'Страница не найдена';
         }
-        echo 'Страница не найдена';
     }
 }
+
+spl_autoload_register(function ($className) {
+    $filePath = __DIR__ . '/MVC/Controllers/' . $className . '.php';
+    if (file_exists($filePath)) {
+        require_once $filePath;
+    }
+});
+
