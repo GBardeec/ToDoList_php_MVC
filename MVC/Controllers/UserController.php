@@ -5,8 +5,8 @@ class UserController
     public function login()
     {
         if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['login']) && isset($_POST['password'])) {
-            $login = htmlspecialchars($_POST['login']);
-            $password = htmlspecialchars($_POST['password']);
+            $login = $_POST['login'];
+            $password = $_POST['password'];
 
             $userModel = new UserModel();
             $loggedIn = $userModel->login($login, $password);
