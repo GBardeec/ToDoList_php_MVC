@@ -26,7 +26,6 @@ class Router
             $controllerName = ucfirst($routeInfo['controller']);
             $methodName = $routeInfo['method'];
 
-            // Замените подключение контроллера на автозагрузку
             $controller = new $controllerName();
 
             $urlParts = explode('/', $url);
